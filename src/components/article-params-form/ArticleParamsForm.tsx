@@ -33,7 +33,7 @@ export const ArticleParamsForm = ({
 	onReset,
 }: ArticleParamsFormProps) => {
 	const [formState, setFormState] = useState<ArticleStateType>(currentState);
-	const formRef = useRef<HTMLDivElement>(null);
+	const sidebarRef = useRef<HTMLDivElement>(null);
 
 	// Синхронизируем состояние формы при изменении currentState
 	useEffect(() => {
@@ -43,17 +43,24 @@ export const ArticleParamsForm = ({
 	// Обработчик клика вне области сайдбара
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
-			if (formRef.current && !formRef.current.contains(event.target as Node)) {
+			if (
+				sidebarRef.current &&
+				!sidebarRef.current.contains(event.target as Node)
+			) {
 				onToggle();
 			}
 		};
 
 		if (isOpen) {
 			document.addEventListener('mousedown', handleClickOutside);
+			document.body.style.overflow = 'hidden';
+		} else {
+			document.body.style.overflow = 'unset';
 		}
 
 		return () => {
 			document.removeEventListener('mousedown', handleClickOutside);
+			document.body.style.overflow = 'unset';
 		};
 	}, [isOpen, onToggle]);
 
@@ -91,9 +98,10 @@ export const ArticleParamsForm = ({
 	};
 
 	return (
-		<div ref={formRef}>
+		<>
 			<ArrowButton isOpen={isOpen} onClick={onToggle} />
 			<aside
+				ref={sidebarRef}
 				className={clsx(styles.container, { [styles.container_open]: isOpen })}>
 				<form
 					className={styles.form}
@@ -152,6 +160,6 @@ export const ArticleParamsForm = ({
 					</div>
 				</form>
 			</aside>
-		</div>
+		</>
 	);
 };
