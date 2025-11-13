@@ -4,6 +4,7 @@ import { Button } from 'src/ui/button';
 import { Select } from 'src/ui/select';
 import { RadioGroup } from 'src/ui/radio-group';
 import { Separator } from 'src/ui/separator';
+import { Text } from 'src/ui/text';
 import {
 	fontFamilyOptions,
 	fontSizeOptions,
@@ -15,23 +16,17 @@ import {
 } from 'src/constants/articleProps';
 
 import styles from './ArticleParamsForm.module.scss';
-import clsx from 'clsx';
 
 type ArticleParamsFormProps = {
-	isOpen: boolean;
-	onToggle: () => void;
 	currentState: ArticleStateType;
 	onApply: (state: ArticleStateType) => void;
-	onReset: () => void;
 };
 
 export const ArticleParamsForm = ({
-	isOpen,
-	onToggle,
 	currentState,
 	onApply,
-	onReset,
 }: ArticleParamsFormProps) => {
+	const [isOpen, setIsOpen] = useState(false);
 	const [formState, setFormState] = useState<ArticleStateType>(currentState);
 	const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +42,7 @@ export const ArticleParamsForm = ({
 				sidebarRef.current &&
 				!sidebarRef.current.contains(event.target as Node)
 			) {
-				onToggle();
+				setIsOpen(false);
 			}
 		};
 
@@ -62,7 +57,7 @@ export const ArticleParamsForm = ({
 			document.removeEventListener('mousedown', handleClickOutside);
 			document.body.style.overflow = 'unset';
 		};
-	}, [isOpen, onToggle]);
+	}, [isOpen]);
 
 	const handleFontFamilyChange = (selected: (typeof fontFamilyOptions)[0]) => {
 		setFormState((prev) => ({ ...prev, fontFamilyOption: selected }));
@@ -89,29 +84,43 @@ export const ArticleParamsForm = ({
 	const handleApply = (e: React.FormEvent) => {
 		e.preventDefault();
 		onApply(formState);
+		setIsOpen(false);
 	};
 
 	const handleReset = (e: React.FormEvent) => {
 		e.preventDefault();
 		setFormState(defaultArticleState);
-		onReset();
+		onApply(defaultArticleState);
+		setIsOpen(false);
+	};
+
+	const handleToggle = () => {
+		setIsOpen(!isOpen);
 	};
 
 	return (
 		<>
-			<ArrowButton isOpen={isOpen} onClick={onToggle} />
+			<ArrowButton isOpen={isOpen} onClick={handleToggle} />
 			<aside
 				ref={sidebarRef}
-				className={clsx(styles.container, { [styles.container_open]: isOpen })}>
+				className={
+					isOpen
+						? `${styles.container} ${styles.container_open}`
+						: styles.container
+				}>
 				<form
 					className={styles.form}
 					onSubmit={handleApply}
 					onReset={handleReset}>
+					<Text as='h2' size={31} weight={800} uppercase>
+						ЗАДАЙТЕ ПАРАМЕТРЫ
+					</Text>
+
 					<Select
 						selected={formState.fontFamilyOption}
 						options={fontFamilyOptions}
 						onChange={handleFontFamilyChange}
-						title='Шрифт'
+						title='ШРИФТ'
 					/>
 
 					<Separator />
@@ -121,42 +130,39 @@ export const ArticleParamsForm = ({
 						options={fontSizeOptions}
 						selected={formState.fontSizeOption}
 						onChange={handleFontSizeChange}
-						title='Размер шрифта'
+						title='РАЗМЕР ШРИФТА'
 					/>
 
 					<Separator />
 
-					<RadioGroup
-						name='font-color'
-						options={fontColors}
+					<Select
 						selected={formState.fontColor}
+						options={fontColors}
 						onChange={handleFontColorChange}
-						title='Цвет шрифта'
+						title='ЦВЕТ ШРИФТА'
 					/>
 
 					<Separator />
 
-					<RadioGroup
-						name='background-color'
-						options={backgroundColors}
+					<Select
 						selected={formState.backgroundColor}
+						options={backgroundColors}
 						onChange={handleBackgroundColorChange}
-						title='Цвет фона'
+						title='ЦВЕТ ФОНА'
 					/>
 
 					<Separator />
 
-					<RadioGroup
-						name='content-width'
-						options={contentWidthArr}
+					<Select
 						selected={formState.contentWidth}
+						options={contentWidthArr}
 						onChange={handleContentWidthChange}
-						title='Ширина контента'
+						title='ШИРИНА КОНТЕНТА'
 					/>
 
 					<div className={styles.bottomContainer}>
-						<Button title='Сбросить' htmlType='reset' type='clear' />
-						<Button title='Применить' htmlType='submit' type='apply' />
+						<Button title='СБРОСИТЬ' htmlType='reset' type='clear' />
+						<Button title='ПРИМЕНИТЬ' htmlType='submit' type='apply' />
 					</div>
 				</form>
 			</aside>
